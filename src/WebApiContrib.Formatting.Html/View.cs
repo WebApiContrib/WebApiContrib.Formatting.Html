@@ -12,9 +12,7 @@ namespace WebApiContrib.Formatting.Html
         {
             Model = model;
             ViewName = viewName;
-
-            if (modelType != null)
-                ModelType = model.GetType();
+            ModelType = modelType ?? (model != null ? model.GetType() : null);
         }
 
         public object Model { get; protected set; }
