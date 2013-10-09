@@ -5,7 +5,7 @@ namespace WebApiContrib.Formatting.Html
     /// <summary>
     /// Represents default implementation of <see cref="IView"/> interface.
     /// </summary>
-    public class View : IView
+    internal sealed class View : IView
     {
         /// <summary>
         /// Creates a new <see cref="View"/> instance.
