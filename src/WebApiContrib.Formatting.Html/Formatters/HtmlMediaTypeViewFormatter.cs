@@ -7,7 +7,6 @@ using System.Net.Http.Formatting;
 using System.Net.Http.Headers;
 using System.Text;
 using System.Threading.Tasks;
-using WebApiContrib.Formatting.Html.Common;
 using WebApiContrib.Formatting.Html.Configuration;
 using WebApiContrib.Formatting.Html.Locators;
 using WebApiContrib.Formatting.Html.ViewParsers;
@@ -132,15 +131,14 @@ namespace WebApiContrib.Formatting.Html.Formatters
         /// <exception cref="T:System.NotSupportedException">Derived types need to support writing.</exception>
         public override Task WriteToStreamAsync(Type type, object value, Stream writeStream, HttpContent content, TransportContext transportContext)
         {
-            return TaskHelpers.RunSync(() =>
-            {
-                var encoding = SelectCharacterEncoding(content.Headers);
+            var encoding = SelectCharacterEncoding(content.Headers);
 
-                var parsedView = ParseView(type, value, encoding);
+            var parsedView = ParseView(type, value, encoding);
 
-                writeStream.Write(parsedView, 0, parsedView.Length);
-                writeStream.Flush();
-            });
+            writeStream.Write(parsedView, 0, parsedView.Length);
+            writeStream.Flush();
+
+            return Task.FromResult<object>(null);
         }
 
         private byte[] ParseView(Type type, object model, Encoding encoding)
