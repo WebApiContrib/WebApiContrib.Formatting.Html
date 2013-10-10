@@ -8,11 +8,9 @@ using System.Net.Http.Formatting;
 using System.Net.Http.Headers;
 using System.Text;
 using System.Threading.Tasks;
-using WebApiContrib.Formatting.Html.Configuration;
-using WebApiContrib.Formatting.Html.Locators;
-using WebApiContrib.Formatting.Html.ViewParsers;
+using WebApiContrib.Formatting.Html;
 
-namespace WebApiContrib.Formatting.Html.Formatters
+namespace WebApiContrib.Formatting.Html.Formatting
 {
     /// <summary>
     /// A <see cref="MediaTypeFormatter"/> that produces HTML content.

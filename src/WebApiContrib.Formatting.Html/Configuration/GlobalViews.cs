@@ -1,26 +1,20 @@
 ﻿using System;
 using System.Collections.Generic;
-using WebApiContrib.Formatting.Html.Locators;
-using WebApiContrib.Formatting.Html.ViewParsers;
+using WebApiContrib.Formatting.Html.Formatting;
 
-namespace WebApiContrib.Formatting.Html.Configuration
+namespace WebApiContrib.Formatting.Html
 {
-    using WebApiContrib.Formatting.Html.Formatters;
-
     /// <summary>
     /// Global configuration of <see cref="HtmlMediaTypeViewFormatter"/> instances.
     /// </summary>
     public static class GlobalViews
     {
-        static GlobalViews()
-        {
-            Views = new Dictionary<Type, string>();
-        }
+        private static readonly IDictionary<Type, string> _views = new Dictionary<Type, string>();
 
         /// <summary>
         /// User-defined mappings from model types to view names.
         /// </summary>
-        public static IDictionary<Type, string> Views { get; private set; }
+        public static IDictionary<Type, string> Views { get { return _views; } }
 
         /// <summary>
         /// Default <see cref="IViewLocator"/> to be used for retrieval of view templates.

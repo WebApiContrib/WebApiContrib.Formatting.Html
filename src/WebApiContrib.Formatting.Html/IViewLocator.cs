@@ -1,4 +1,4 @@
-﻿namespace WebApiContrib.Formatting.Html.Locators
+﻿namespace WebApiContrib.Formatting.Html
 {
     /// <summary>
     /// Interface for view locators. A view locator loads unparsed view templates 
