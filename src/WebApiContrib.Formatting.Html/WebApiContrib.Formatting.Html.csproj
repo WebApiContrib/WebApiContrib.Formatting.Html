@@ -56,11 +56,11 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Configuration\GlobalViews.cs" />
+    <Compile Include="Configuration\Extensions.cs" />
     <Compile Include="Formatters\HtmlMediaTypeViewFormatter.cs" />
     <Compile Include="IView.cs" />
     <Compile Include="Locators\IViewLocator.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="View.cs" />
     <Compile Include="ViewResult.cs" />
     <Compile Include="ViewAttribute.cs" />
     <Compile Include="ViewParsers\IViewParser.cs" />

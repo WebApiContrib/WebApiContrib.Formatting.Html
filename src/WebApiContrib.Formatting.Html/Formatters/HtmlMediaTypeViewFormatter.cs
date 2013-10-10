@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Configuration;
 using System.IO;
+using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Formatting;
@@ -96,20 +97,11 @@ namespace WebApiContrib.Formatting.Html.Formatters
             if (_viewLocator == null || _viewParser == null)
             {
                 var config = request.GetConfiguration();
-
                 if (config != null)
                 {
-                    IViewLocator viewLocator = null;
-                    IViewParser viewParser = null;
-
                     var resolver = config.DependencyResolver;
-
-                    if (_viewLocator == null)
-                        viewLocator = (IViewLocator) resolver.GetService(typeof (IViewLocator));
-
-                    if (_viewParser == null)
-                        viewParser = (IViewParser) resolver.GetService(typeof (IViewParser));
-
+                    var viewLocator = _viewLocator ?? (IViewLocator) resolver.GetService(typeof(IViewLocator));
+                    var viewParser = _viewParser ?? (IViewParser) resolver.GetService(typeof(IViewParser));
                     return new HtmlMediaTypeViewFormatter(_siteRootPath, viewLocator, viewParser);
                 }
             }
@@ -132,7 +124,6 @@ namespace WebApiContrib.Formatting.Html.Formatters
         public override Task WriteToStreamAsync(Type type, object value, Stream writeStream, HttpContent content, TransportContext transportContext)
         {
             var encoding = SelectCharacterEncoding(content.Headers);
-
             var parsedView = ParseView(type, value, encoding);
 
             writeStream.Write(parsedView, 0, parsedView.Length);
@@ -143,11 +134,8 @@ namespace WebApiContrib.Formatting.Html.Formatters
 
         private byte[] ParseView(Type type, object model, Encoding encoding)
         {
-            var viewName = GetViewName(model != null ? model.GetType() : type);
-            var view = model as IView ?? new View(viewName, model, type);
-
+            var view = GetView(model, type);
             var viewTemplate = ViewLocator.GetView(_siteRootPath, view);
-
             return ViewParser.ParseView(view, viewTemplate, encoding);
         }
 
@@ -179,16 +167,76 @@ namespace WebApiContrib.Formatting.Html.Formatters
             }
         }
 
-        private static string GetViewName(Type modelType)
+        private static IView GetView(object model, Type type)
         {
-            var viewAttributes = (ViewAttribute[])modelType.GetCustomAttributes(typeof(ViewAttribute), true);
-            if (viewAttributes.Length > 0)
-                return viewAttributes[0].ViewName;
-            
-            if (GlobalViews.Views.ContainsKey(modelType))
-                return GlobalViews.Views[modelType];
+            if (model is IView)
+                return model as IView;
 
-            return modelType.Name;
+            var modelType = model != null ? model.GetType() : type;
+
+            string viewName = modelType.GetCustomAttributes(typeof(ViewAttribute), true)
+                .Cast<ViewAttribute>()
+                .Select(a => a.ViewName)
+                .FirstOrDefault();
+
+            if (viewName == null)
+                viewName = GlobalViews.Views.ContainsKey(modelType) ?
+                           GlobalViews.Views[modelType] :
+                           modelType.Name;
+
+            return new View(viewName, model, modelType);
+        }
+
+        /// <summary>
+        /// Represents default implementation of <see cref="IView"/> interface.
+        /// </summary>
+        private sealed class View : IView
+        {
+            private readonly string _viewName;
+            private readonly object _model;
+            private readonly Type _modelType;
+
+            /// <summary>
+            /// Creates a new <see cref="View"/> instance.
+            /// </summary>
+            /// <param name="viewName">The view name, used to resolve the view template definition.</param>
+            /// <param name="model">The data to be presented by the view.</param>
+            public View(string viewName, object model) : this(viewName, model, null)
+            {
+            }
+
+            /// <summary>
+            /// Creates a new <see cref="View"/> instance.
+            /// </summary>
+            /// <param name="viewName">The view name, used to resolve the view template definition.</param>
+            /// <param name="model">The data to be presented by the view.</param>
+            /// <param name="modelType">Optional explicit definition of data type for <see cref="Model"/>. 
+            /// </param>
+            /// <exception cref="ArgumentException"><paramref name="modelType"/> must be public.</exception>
+            public View(string viewName, object model, Type modelType)
+            {
+                _model = model;
+                _viewName = viewName;
+                _modelType = modelType ?? (model != null ? model.GetType() : null);
+            }
+
+            /// <summary>
+            /// The data to be presented by the view.
+            /// </summary>
+            public object Model { get { return _model; } }
+
+            /// <summary>
+            /// The view name, used to resolve the view template definition.
+            /// </summary>
+            public string ViewName { get { return _viewName; } }
+
+            /// <summary>
+            /// Optional explicit definition of data type for <see cref="Model"/>. When specified,
+            /// this type must be public and have a type name that matches the C# and VB language
+            /// rules for identifiers. It should not be set if the model is an anonymous type or
+            /// a compiler-generated iterator (enumerable or enumerator) type.
+            /// </summary>
+            public Type ModelType { get { return _modelType; } }
         }
     }
 }

@@ -1,8 +1,10 @@
 ﻿using System;
+using System.Net;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Web.Http;
+using WebApiContrib.Formatting.Html.Formatters;
 
 namespace WebApiContrib.Formatting.Html
 {
@@ -11,6 +13,11 @@ namespace WebApiContrib.Formatting.Html
     /// </summary>
     public class ViewResult : IView, IHttpActionResult
     {
+        private readonly HttpRequestMessage _requestMessage;
+        private readonly string _viewName;
+        private readonly object _model;
+        private readonly Type _modelType;
+
         /// <summary>
         /// Creates a new <see cref="ViewResult"/> instance.
         /// </summary>
@@ -33,26 +40,26 @@ namespace WebApiContrib.Formatting.Html
         /// <exception cref="ArgumentException"><paramref name="modelType"/> must be public.</exception>
         public ViewResult(HttpRequestMessage request, string viewName, object model, Type modelType)
         {
-            RequestMessage = request;
-            Model = model;
-            ViewName = viewName;
-            ModelType = modelType ?? (model != null ? model.GetType() : null);
+            _requestMessage = request;
+            _model = model;
+            _viewName = viewName;
+            _modelType = modelType ?? (model != null ? model.GetType() : null);
         }
 
         /// <summary>
         /// The current request message.
         /// </summary>
-        public HttpRequestMessage RequestMessage { get; private set; }
+        public HttpRequestMessage RequestMessage { get { return _requestMessage; } }
 
         /// <summary>
         /// The data to be presented by the view.
         /// </summary>
-        public object Model { get; private set; }
+        public object Model { get { return _model; } }
 
         /// <summary>
         /// The view name, used to resolve the view template definition.
         /// </summary>
-        public string ViewName { get; private set; }
+        public string ViewName { get { return _viewName; } }
 
         /// <summary>
         /// Optional explicit definition of data type for <see cref="Model"/>. When specified,
@@ -60,7 +67,7 @@ namespace WebApiContrib.Formatting.Html
         /// rules for identifiers. It should not be set if the model is an anonymous type or
         /// a compiler-generated iterator (enumerable or enumerator) type.
         /// </summary>
-        public Type ModelType { get; private set; }
+        public Type ModelType { get { return _modelType; } }
 
         /// <summary>
         /// Executes this <see cref="IHttpActionResult"/> to retrieve a <see cref="HttpResponseMessage"/> from the view data.
@@ -69,7 +76,9 @@ namespace WebApiContrib.Formatting.Html
         /// <returns>The <see cref="HttpResponseMessage"/> representing the view data.</returns>
         public Task<HttpResponseMessage> ExecuteAsync(CancellationToken cancellationToken)
         {
-            return Task.FromResult(RequestMessage.CreateResponse(new View(ViewName, Model, ModelType)));
+            var config = RequestMessage.GetConfiguration();
+            var response = RequestMessage.CreateResponse(HttpStatusCode.OK, this, config.Formatters.GetHtmlFormatter());
+            return Task.FromResult(response);
         }
     }
 }
