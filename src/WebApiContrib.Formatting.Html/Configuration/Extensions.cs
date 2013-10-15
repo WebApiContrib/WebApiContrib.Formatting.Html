@@ -13,10 +13,10 @@ namespace WebApiContrib.Formatting.Html
     public static class Extensions
     {
         /// <summary>
-        /// Retrieves the <see cref="MediaTypeFormatter"/> registered to handle HTML.
+        /// Retrieves the <see cref="System.Net.Http.Formatting.MediaTypeFormatter"/> registered to handle HTML.
         /// </summary>
         /// <param name="formatters">The <see cref="MediaTypeFormatterCollection"/>.</param>
-        /// <returns>The <see cref="HtmlMediaTypeFormatter"/> registered to handle requests for HTML.</returns>
+        /// <returns>The HtmlMediaTypeFormatter registered to handle requests for HTML.</returns>
         public static HtmlMediaTypeViewFormatter GetHtmlFormatter(this MediaTypeFormatterCollection formatters)
         {
             return formatters.OfType<HtmlMediaTypeViewFormatter>().SingleOrDefault();
