@@ -1,6 +1,6 @@
 ﻿using System.Text;
 
-namespace WebApiContrib.Formatting.Html.ViewParsers
+namespace WebApiContrib.Formatting.Html
 {
     /// <summary>
     /// Interface for view template parsers. A view template 
