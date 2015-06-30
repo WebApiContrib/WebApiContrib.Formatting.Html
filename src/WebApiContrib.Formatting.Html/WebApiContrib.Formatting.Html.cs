@@ -415,10 +415,11 @@ namespace WebApiContrib.Formatting.Html
         /// <returns>The <see cref="HttpResponseMessage"/> representing the view data.</returns>
         public Task<HttpResponseMessage> ExecuteAsync(CancellationToken cancellationToken)
         {
-            var config = RequestMessage.GetConfiguration();
-            var response = RequestMessage.CreateResponse(HttpStatusCode.OK, this, Formatting.Extensions.GetHtmlFormatter(config.Formatters));
+            var response = RequestMessage.CreateResponse(HttpStatusCode.OK, this, TextHtmlMediaType);
             return Task.FromResult(response);
         }
+
+        private static readonly MediaTypeHeaderValue TextHtmlMediaType = new MediaTypeHeaderValue("text/html");
     }
 
     /// <summary>
