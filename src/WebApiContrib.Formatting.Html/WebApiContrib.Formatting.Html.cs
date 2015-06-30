@@ -339,7 +339,10 @@ namespace WebApiContrib.Formatting.Html
             /// <returns>The HtmlMediaTypeFormatter registered to handle requests for HTML.</returns>
             public static MediaTypeFormatter GetHtmlFormatter(this MediaTypeFormatterCollection formatters)
             {
-                return formatters.OfType<Formatting.HtmlMediaTypeViewFormatter>().SingleOrDefault();
+                return formatters
+                    .Select(formatter => System.Web.Http.Services.Decorator.GetInner<MediaTypeFormatter>(formatter))
+                    .OfType<Formatting.HtmlMediaTypeViewFormatter>()
+                    .SingleOrDefault();
             }
         }
     }
