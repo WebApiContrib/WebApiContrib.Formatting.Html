@@ -339,7 +339,10 @@ namespace WebApiContrib.Formatting.Html
             /// <returns>The HtmlMediaTypeFormatter registered to handle requests for HTML.</returns>
             public static MediaTypeFormatter GetHtmlFormatter(this MediaTypeFormatterCollection formatters)
             {
-                return formatters.OfType<Formatting.HtmlMediaTypeViewFormatter>().SingleOrDefault();
+                return formatters
+                    .Select(formatter => System.Web.Http.Services.Decorator.GetInner<MediaTypeFormatter>(formatter))
+                    .OfType<Formatting.HtmlMediaTypeViewFormatter>()
+                    .SingleOrDefault();
             }
         }
     }
@@ -412,10 +415,11 @@ namespace WebApiContrib.Formatting.Html
         /// <returns>The <see cref="HttpResponseMessage"/> representing the view data.</returns>
         public Task<HttpResponseMessage> ExecuteAsync(CancellationToken cancellationToken)
         {
-            var config = RequestMessage.GetConfiguration();
-            var response = RequestMessage.CreateResponse(HttpStatusCode.OK, this, Formatting.Extensions.GetHtmlFormatter(config.Formatters));
+            var response = RequestMessage.CreateResponse(HttpStatusCode.OK, this, TextHtmlMediaType);
             return Task.FromResult(response);
         }
+
+        private static readonly MediaTypeHeaderValue TextHtmlMediaType = new MediaTypeHeaderValue("text/html");
     }
 
     /// <summary>
